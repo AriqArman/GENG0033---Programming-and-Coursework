@@ -19,7 +19,7 @@ def validateName():
         name = input("Enter the name of the item (cannot be solely a number): ").strip().upper()
         try:
             name = float(name)  
-            print("Quantity cannot be less than zero!")
+            print("Name cannot be solely of numbers!")
             
         except:
             return name
@@ -164,7 +164,10 @@ def filterSystem(data):
         elif choice == "4" or choice == "4." or choice == "additional information":
             additionalInformationCriteria = validateName()
         elif choice == "y":
-            return filterLogic(data, name = nameCriteria, quantity = quantityCriteria, price = priceCriteria, additional_information = additionalInformationCriteria)
+            return filterLogic(data, name = nameCriteria, 
+                               quantity = quantityCriteria, 
+                               price = priceCriteria, 
+                               additional_information = additionalInformationCriteria)
 
     
     
