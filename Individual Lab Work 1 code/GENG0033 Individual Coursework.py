@@ -16,18 +16,20 @@ def createCSV(dataname: str):
 
 def validateName():
     while True:
-        name = input("Enter the name of the item (cannot be solely a number): ").upper()
-        if isinstance(name, str) and name.isdigit() == False:
+        name = input("Enter the name of the item (cannot be solely a number): ").strip().upper()
+        try:
+            name = float(name)  
+            print("Quantity cannot be less than zero!")
+            
+        except:
             return name
-        else:
-            name = input("Enter the name of the item (cannot be solely a number): ").upper()
 
 def validateQuantity():
     while True:
         quantity = input("Enter the quantity of the item (must be a number) : ")
         
         try:
-            quantity = float(quantity)
+            quantity = int(quantity)
             if quantity > 0:
                 return quantity
             else:
@@ -61,12 +63,12 @@ def validateIntegerInput():
 def additionalInformation():
     new_additional_info = set()
     print("Enter an additional information of an item below. If there are none, press enter")
-    additional_info = input("Answer: ").upper()
+    additional_info = input("Answer: ").upper().strip()
     new_additional_info.add(additional_info)
     while True:
         cont = input("Do you wish to add more additional information of the item? [Y/N]: ").lower()
         if cont == 'y':
-            additional_info = input("Enter the an additional information of an item: ")
+            additional_info = input("Enter the an additional information of an item: ").upper().strip()
             new_additional_info.add(additional_info)
             continue
         elif cont == 'n':
@@ -103,24 +105,29 @@ def removeItem(data: str) -> pd.DataFrame:
     df = createCSV(data)
 
     iloc = validateIntegerInput()
-    #Get the information of the item to remove
-    item_name = df.loc[int(iloc), "Name"]
-    item_qty = df.loc[int(iloc), "Quantity"]
-    item_price = df.loc[int(iloc), "Price"]
-    if pd.notna(df.loc[int(iloc), "Additional_Information"]):
-        item_info = df.loc[int(iloc), "Additional_Information"]
+    try:
+        #Get the information of the item to remove
+        item_name = df.loc[int(iloc), "Name"]
+        item_qty = df.loc[int(iloc), "Quantity"]
+        item_price = df.loc[int(iloc), "Price"]
+        if pd.notna(df.loc[int(iloc), "Additional_Information"]):
+            item_info = df.loc[int(iloc), "Additional_Information"]
 
-    else:
-        item_info = None
-    
-    #Remove item from inventory
-    df.drop(int(iloc), inplace=True)
+        else:
+            item_info = None
+        
+        #Remove item from inventory
+        df.drop(int(iloc), inplace=True)
 
-    #Save updated inventory to CSV file
-    df.to_csv('inventory.csv', index= False)
+        #Save updated inventory to CSV file
+        df.to_csv('inventory.csv', index= False)
 
-    #Print confirmation message
-    print(f"{item_qty} {item_name} priced at {item_price} with additional information of {item_info} has been removed.")
+        #Print confirmation message
+        print(f"{item_qty} {item_name} priced at {item_price} with additional information of {item_info} has been removed.")
+
+    except: 
+        print("Invalid Index Location")
+        return
 
 #filter system
 def filterSystem(data):
@@ -145,7 +152,7 @@ def filterSystem(data):
         print(f"3. Price: {priceCriteria}")
         print(f"4. Additional Information: {additionalInformationCriteria}")
         print("Apply filter? [Y]")
-
+        print("Enter 1-5 to apply the filter criteria desired or y to apply the filter criteria")
         choice = input("What would you like to do?: ").lower()
         
         if choice == "1" or choice == "1." or choice == "name":
@@ -197,7 +204,7 @@ def pagingSystem(data) -> bool:
     df = createCSV(data)
 
     # print first 10 items
-    print(df.iloc[:10])
+    print(df.iloc[:10, :-2])
 
     # paging system
     nextPage = input("Next page? (Y/N): ")
@@ -207,7 +214,7 @@ def pagingSystem(data) -> bool:
         if nextPage.capitalize() == 'Y':
             i += 10
             if not df.iloc[i:i+10].empty:
-                print(df.iloc[i:i+10])
+                print(df.iloc[i:i+10, :-2])
                 nextPage = input("Next page? (Y/N): ")
             else:
                 print("No more items to show")
@@ -266,13 +273,12 @@ def userInterface():
 
         elif choice == "5" or choice == "5." or choice == "filter item":
             if pagingSystem(dataname) == True:
-                print(filterSystem(dataname))
+                filtered_items = filterSystem(dataname)
+                print(filtered_items.iloc[:, :-2])
                 
-
-
         elif choice == "6" or choice == "6." or choice == "clear system":
            clearDF(dataname)
-           continue
+           
 
         elif choice == "7" or choice == "7." or choice == "quit":
             print("Goodbye!")
