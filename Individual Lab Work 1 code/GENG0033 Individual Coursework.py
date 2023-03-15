@@ -26,7 +26,7 @@ def validateName():
 
 def validateQuantity():
     while True:
-        quantity = input("Enter the quantity of the item (must be a number) : ")
+        quantity = input("Enter the quantity of the item (must be a whole number) : ")
         
         try:
             quantity = int(quantity)
@@ -36,7 +36,7 @@ def validateQuantity():
                 print("Quantity cannot be less than zero!")
             
         except:
-            print("Quantity of the item must be a number!")
+            print("Quantity of the item must be a whole number!")
 
 def validatePrice():
     while True:
@@ -152,7 +152,7 @@ def filterSystem(data):
         print(f"3. Price: {priceCriteria}")
         print(f"4. Additional Information: {additionalInformationCriteria}")
         print("Apply filter? [Y]")
-        print("Enter 1-5 to apply the filter criteria desired or y to apply the filter criteria")
+        print("Enter 1-4 to set the filter criteria desired or y to apply the filter criteria")
         choice = input("What would you like to do?: ").lower()
         
         if choice == "1" or choice == "1." or choice == "name":
@@ -174,34 +174,37 @@ def filterSystem(data):
     
 def editItem(data: str, iloc: int):
     df = createCSV(data)
-    # Get the item information to be edited
-    item_to_edit = df.iloc[iloc]
+    try:
+        # Get the item information to be edited
+        item_to_edit = df.iloc[iloc]
 
-    # Display the current item information
-    print(f"Current item information: {item_to_edit['Name']}, {item_to_edit['Quantity']}, {item_to_edit['Price']}, {item_to_edit['Additional_Information']}")
+        # Display the current item information
+        print(f"Current item information: {item_to_edit['Name']}, {item_to_edit['Quantity']}, {item_to_edit['Price']}, {item_to_edit['Additional_Information']}")
 
-    # Get the new item information from the user
-    new_name = validateName()
-    new_quantity = validateQuantity()
-    new_price = validatePrice()
-    new_additional_info = additionalInformation()
+        # Get the new item information from the user
+        new_name = validateName()
+        new_quantity = validateQuantity()
+        new_price = validatePrice()
+        new_additional_info = additionalInformation()
 
-    # Check if the new item name and additional information already exist in the CSV file
-    if df[(df['Name'] == new_name) & (df['Additional_Information'] == new_additional_info)].shape[0] > 0:
-        print("This item already exists in the inventory. No edits made. ")
-        return
+        # Check if the new item name and additional information already exist in the CSV file
+        if df[(df['Name'] == new_name) & (df['Additional_Information'] == new_additional_info)].shape[0] > 0:
+            print("This item already exists in the inventory. No edits made. ")
+            return
 
-    # Update the item information in the DataFrame
-    df.at[iloc, 'Name'] = new_name
-    df.at[iloc, 'Quantity'] = new_quantity
-    df.at[iloc, 'Price'] = new_price
-    df.at[iloc, 'Additional_Information'] = new_additional_info
+        # Update the item information in the DataFrame
+        df.at[iloc, 'Name'] = new_name
+        df.at[iloc, 'Quantity'] = new_quantity
+        df.at[iloc, 'Price'] = new_price
+        df.at[iloc, 'Additional_Information'] = new_additional_info
 
-    # Save the updated DataFrame to the CSV file
-    df.to_csv("inventory.csv", index=False)
+        # Save the updated DataFrame to the CSV file
+        df.to_csv("inventory.csv", index=False)
 
-    print("Item updated successfully.")
-    
+        print("Item updated successfully.")
+    except:
+        print("Invalid Index Location")
+        return  
 def pagingSystem(data) -> bool:
     # show list of all items
     df = createCSV(data)
@@ -277,7 +280,8 @@ def userInterface():
         elif choice == "5" or choice == "5." or choice == "filter item":
             if pagingSystem(dataname) == True:
                 filtered_items = filterSystem(dataname)
-                print(filtered_items.iloc[:, :-2])
+                if filtered_items is not None:
+                    print(filtered_items.iloc[:, :-2])
                 
         elif choice == "6" or choice == "6." or choice == "clear system":
            clearDF(dataname)
